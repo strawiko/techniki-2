@@ -5,6 +5,7 @@
 #include <cctype>
 #include <string>
 #include <deque>
+#include<future>
 using namespace std;
 
 struct operacja
@@ -50,13 +51,20 @@ int jakwazny(char znak)
         return 0;
     }
 }
-
+bool jestoperatorem(char znak)
+{
+	return (znak == '+' || znak == '-' || znak == '*' || znak == '/' || znak == '(' || znak == ')');
+}
 string rozdziel(string& input, int& pozycja)
 {
     string wyraz;
-    while (pozycja < input.length() && isspace(input[pozycja]))
+    while (pozycja < input.length() && (isspace(input[pozycja])))
     {
         pozycja++;
+    }
+    if (!jestoperatorem(input[pozycja]) && !isdigit(input[pozycja]))
+    {
+        return "zly";
     }
     if (pozycja < input.length() && isdigit(input[pozycja]))
     {
@@ -73,7 +81,7 @@ string rozdziel(string& input, int& pozycja)
 }
 int dzialanie(deque<string>& kolejka)
 {
-	
+    
     if (kolejka.empty())
     {
         return 0;
@@ -81,7 +89,6 @@ int dzialanie(deque<string>& kolejka)
 
     string element = kolejka.front();
     kolejka.pop_front();
-
     if (isNumber(element))
     {
         return Toint(element);
@@ -120,10 +127,15 @@ int main()
     getline(cin, input);
     string wyraz;
     int pozycja = 0;
-
+   
     while (pozycja < input.length())
     {
         wyraz = rozdziel(input, pozycja);
+		if (wyraz == "zly")
+		{
+			cout << "nieprawidlowy znak" << endl;
+			return 0;   
+		}
         if (isNumber(wyraz))
         {
             kolejkawyjscie.push_front(wyraz);
@@ -168,11 +180,7 @@ int main()
                 return 0;
             }
         }
-        else if (!wyraz.empty())
-        {
-            cout << "Bledny znak" << endl;
-            return 0;
-        }
+        
     }
 
     while (!stos.empty())
@@ -180,9 +188,16 @@ int main()
         kolejkawyjscie.push_front(string(1, stos.top()));
         stos.pop();
     }    
-        
+    for (int i = kolejkawyjscie.size() - 1; i >= 0; i--)
+    {
+        cout << kolejkawyjscie[i] << " ";
+	}cout << endl;
     
-   cout<< dzialanie(kolejkawyjscie);
+   
+
+    auto future_result = std::async(std::launch::async, dzialanie, std::ref(kolejkawyjscie));
+    int wynik = future_result.get();
+    cout << wynik << endl;
 	
 
     return 0;
