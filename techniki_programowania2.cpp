@@ -3,8 +3,8 @@
 #include <iostream>
 #include <stack>
 #include <cctype>
-#include <queue>
 #include <string>
+#include <deque>
 using namespace std;
 
 struct operacja
@@ -71,38 +71,51 @@ string rozdziel(string& input, int& pozycja)
     }
     return wyraz;
 }
-int dzialanie(string ope, string a, string b)
+int dzialanie(deque<string>& kolejka)
 {
-	char op = ope[0];
-	int c=Toint(a);
-	int d = Toint(b);
-	cout<< c<<" " << d <<" "<< op << endl;
-	switch (op)
-	{
-	case '+':
-		c += d;
-		break;
-	case '-':
-		c -= d;
-		break;
-	case '*':
-		c *= d;
-		break;
-	case '/':
-		if (d != 0)
-			c /= d;
-		else
-			cout << "Dzielenie przez zero!" << endl;
-		break;
-	default:
-		cout << "Nieznany operator!" << endl;
-	}
-	return c;
+	
+    if (kolejka.empty())
+    {
+        return 0;
+    }
+
+    string element = kolejka.front();
+    kolejka.pop_front();
+
+    if (isNumber(element))
+    {
+        return Toint(element);
+    }
+    else
+    {
+        int b = dzialanie(kolejka);
+        int a = dzialanie(kolejka);
+        char op = element[0];
+
+        switch (op)
+        {
+        case '+':
+            return a + b;
+        case '-':
+            return a - b;
+        case '*':
+            return a * b;
+        case '/':
+            if (b != 0)
+                return a / b;
+            else
+                cout << "Dzielenie przez zero!" << endl;
+            return 0;
+        default:
+            cout << "Nieznany operator!" << endl;
+            return 0;
+        }
+    }
 }
 int main()
 {
     stack<char> stos;
-    queue<string> kolejkawyjscie;
+    deque<string> kolejkawyjscie;
     string input;
     getline(cin, input);
     string wyraz;
@@ -113,7 +126,7 @@ int main()
         wyraz = rozdziel(input, pozycja);
         if (isNumber(wyraz))
         {
-            kolejkawyjscie.push(wyraz);
+            kolejkawyjscie.push_front(wyraz);
         }
         else if (wyraz == "+" || wyraz == "-" || wyraz == "*" || wyraz == "/")
         {
@@ -128,7 +141,7 @@ int main()
             {
                 while (!stos.empty() && jakwazny(stos.top()) >= op.priorytet)
                 {
-                    kolejkawyjscie.push(string(1, stos.top()));
+                    kolejkawyjscie.push_front(string(1, stos.top()));
                     stos.pop();
                 }
                 stos.push(wyraz[0]);
@@ -142,7 +155,7 @@ int main()
         {
             while (!stos.empty() && stos.top() != '(')
             {
-                kolejkawyjscie.push(string(1, stos.top()));
+                kolejkawyjscie.push_front(string(1, stos.top()));
                 stos.pop();
             }
             if (!stos.empty())
@@ -164,22 +177,13 @@ int main()
 
     while (!stos.empty())
     {
-        kolejkawyjscie.push(string(1, stos.top()));
+        kolejkawyjscie.push_front(string(1, stos.top()));
         stos.pop();
-    }
-
-    string a = kolejkawyjscie.front();
-    kolejkawyjscie.pop();
-    while (!kolejkawyjscie.empty())
-    {
-
-        string b = kolejkawyjscie.front();
-        kolejkawyjscie.pop();
-        string ope = kolejkawyjscie.front();
-        kolejkawyjscie.pop();
-        a = to_string(dzialanie(ope, a, b));
-    }
-	cout << "Wynik: " << a << endl;
+    }    
+        
+    
+   cout<< dzialanie(kolejkawyjscie);
+	
 
     return 0;
 }
