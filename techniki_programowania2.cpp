@@ -14,17 +14,6 @@ struct operacja
     int priorytet;
 };
 
-bool isNumber(const string& wyraz)
-{
-    for (char c : wyraz)
-    {
-        if (!isdigit(c))
-        {
-            return false;
-        }
-    }
-    return true;
-}
 
 int Toint(string wyraz)
 {
@@ -55,7 +44,7 @@ bool jestoperatorem(char znak)
 {
 	return (znak == '+' || znak == '-' || znak == '*' || znak == '/' || znak == '(' || znak == ')');
 }
-string rozdziel(string& input, int& pozycja)
+string rozdziel(string& input, int& pozycja,bool &beforeisdigit)
 {
     string wyraz;
     while (pozycja < input.length() && (isspace(input[pozycja])))
@@ -73,23 +62,33 @@ string rozdziel(string& input, int& pozycja)
             wyraz += input[pozycja++];
         }
     }
-    else if (pozycja < input.length() && (input[pozycja] == '+' || input[pozycja] == '-' || input[pozycja] == '*' || input[pozycja] == '/' || input[pozycja] == '(' || input[pozycja] == ')'))
+    else if (pozycja < input.length() && jestoperatorem(input[pozycja]))
     {
         wyraz += input[pozycja++];
+    }
+    if(isdigit(wyraz[0])&&beforeisdigit==1)
+    {
+        return "zly";
+    }
+    else if (isdigit(wyraz[0]))
+    {
+        beforeisdigit=1;
+    }
+    else
+    {
+        beforeisdigit=0;
     }
     return wyraz;
 }
 int dzialanie(deque<string>& kolejka)
 {
-    
     if (kolejka.empty())
     {
         return 0;
     }
-
     string element = kolejka.front();
     kolejka.pop_front();
-    if (isNumber(element))
+    if (isdigit(element[0]))
     {
         return Toint(element);
     }
@@ -98,7 +97,6 @@ int dzialanie(deque<string>& kolejka)
         int b = dzialanie(kolejka);
         int a = dzialanie(kolejka);
         char op = element[0];
-
         switch (op)
         {
         case '+':
@@ -111,10 +109,10 @@ int dzialanie(deque<string>& kolejka)
             if (b != 0)
                 return a / b;
             else
-                cout << "Dzielenie przez zero!" << endl;
+                std::cout << "Dzielenie przez zero!" << endl;
             return 0;
         default:
-            cout << "Nieznany operator!" << endl;
+            std::cout << "Nieznany operator!" << endl;
             return 0;
         }
     }
@@ -124,19 +122,19 @@ int main()
     stack<char> stos;
     deque<string> kolejkawyjscie;
     string input;
-    getline(cin, input);
+    getline(std::cin, input);
     string wyraz;
     int pozycja = 0;
-   
+   bool beforeisdigit=0;
     while (pozycja < input.length())
     {
-        wyraz = rozdziel(input, pozycja);
+        wyraz = rozdziel(input, pozycja,beforeisdigit);
 		if (wyraz == "zly")
 		{
-			cout << "nieprawidlowy znak" << endl;
+			std::cout << "nieprawidlowa składnia" << endl;
 			return 0;   
 		}
-        if (isNumber(wyraz))
+        if (isdigit(wyraz[0]))
         {
             kolejkawyjscie.push_front(wyraz);
         }
@@ -146,7 +144,7 @@ int main()
             op.priorytet = jakwazny(wyraz[0]);
             if (op.priorytet == 0)
             {
-                cout << "Bledny operator" << endl;
+                std::cout << "Bledny operator" << endl;
                 return 0;
             }
             else
@@ -176,7 +174,7 @@ int main()
             }
             else
             {
-                cout << "Bledny nawias" << endl;
+                std::cout << "Bledny nawias" << endl;
                 return 0;
             }
         }
@@ -190,14 +188,14 @@ int main()
     }    
     for (int i = kolejkawyjscie.size() - 1; i >= 0; i--)
     {
-        cout << kolejkawyjscie[i] << " ";
-	}cout << endl;
+        std::cout << kolejkawyjscie[i] << " ";
+	}std::cout << endl;
     
    
 
     auto future_result = std::async(std::launch::async, dzialanie, std::ref(kolejkawyjscie));
     int wynik = future_result.get();
-    cout << wynik << endl;
+    std::cout << wynik << endl;
 	
 
     return 0;
