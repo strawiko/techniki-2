@@ -119,6 +119,7 @@ int dzialanie(deque<string>& kolejka)
 }
 int main()
 {
+    cout << "Podaj wyrazenie do obliczenia: " << endl;
     stack<char> stos;
     deque<string> kolejkawyjscie;
     string input;
