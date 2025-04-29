@@ -1,4 +1,4 @@
-// techniki_programowania2.cpp
+//Filip Strawa 203655, Marek Kulma 203260 ACiR 2A
 
 #include <iostream>
 #include <stack>
